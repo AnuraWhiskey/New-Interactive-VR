@@ -439,6 +439,7 @@ GameObject:
   - component: {fileID: 7072478885644867327}
   - component: {fileID: 7072478885652658473}
   - component: {fileID: -9051495052960773097}
+  - component: {fileID: 1034139825084985256}
   m_Layer: 0
   m_Name: LeftHand
   m_TagString: Untagged
@@ -500,6 +501,19 @@ MonoBehaviour:
     type: 3}
   TriggerInputActionReference: {fileID: -4289430672226363583, guid: c348712bda248c246b8c49b3db54643f,
     type: 3}
+--- !u!114 &1034139825084985256
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7072478885645355679}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21240a9c9fdb89641a9803b9ac8f1c17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PokeAttachPoint: {fileID: 7072478885644867269}
 --- !u!1 &7072478885645355745
 GameObject:
   m_ObjectHideFlags: 0
