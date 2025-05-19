@@ -5,6 +5,10 @@ TagManager:
   serializedVersion: 2
   tags:
   - Monster
+  - Path
+  - Car
+  - Terrain
+  - Wall
   layers:
   - Default
   - TransparentFX
