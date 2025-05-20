@@ -23,8 +23,6 @@ public class CarEngine : MonoBehaviour
     public WheelCollider wheelRL;
     public WheelCollider wheelRR;
 
-    public GameObject skidPrefab; // 스키드 마크 프리팹
-    private float skidTime; // 스키드 마크 생성 간격 타이머
 
     public float maxMotorTorque = 100f;  // 바퀴의 회전력
     public float maxBrakeTorque = 200f; // 브레이크 되는 값
@@ -78,8 +76,7 @@ public class CarEngine : MonoBehaviour
                 }
             }
         }
-
-        StartCoroutine(WaitBeforeStarting(5f)); // 5초 대기후 출발
+        isReadyToMove = true; // 차량을 움직일 준비 완료
     }
     private void SetTireFrictionByCarType()
     {
@@ -158,47 +155,6 @@ public class CarEngine : MonoBehaviour
         wheel.sidewaysFriction = sideways;
     }
 
-    private IEnumerator WaitBeforeStarting(float waitTime)
-    {
-            Rigidbody rb = GetComponent<Rigidbody>();
-    if (rb != null)
-    {
-        rb.velocity = Vector3.zero; // 선속도 초기화
-        rb.angularVelocity = Vector3.zero; // 각속도 초기화
-    }
-        ApplyBrakes();
-        yield return new WaitForSeconds(waitTime); // 지정된 시간 대기
-        ReleaseBrakes();
-        isReadyToMove = true; // 차량을 움직일 준비 완료
-        StartCoroutine(InitialBoost(5f, 8f)); // 5초 동안 8배 가속 부스트
-    }
-    private void ApplyBrakes()
-    {
-        wheelFL.brakeTorque = maxBrakeTorque;
-        wheelFR.brakeTorque = maxBrakeTorque;
-        wheelRL.brakeTorque = maxBrakeTorque;
-        wheelRR.brakeTorque = maxBrakeTorque;
-    }
-
-    private void ReleaseBrakes()
-    {
-        wheelFL.brakeTorque = 0;
-        wheelFR.brakeTorque = 0;
-        wheelRL.brakeTorque = 0;
-        wheelRR.brakeTorque = 0;
-    }
-    private IEnumerator InitialBoost(float boostDuration, float boostMultiplier)
-    {
-        isBoosting = true;
-
-        float originalMotorTorque = maxMotorTorque;
-        maxMotorTorque *= boostMultiplier; // 토크 증가
-
-        yield return new WaitForSeconds(boostDuration); // 부스트 지속 시간
-
-        maxMotorTorque = originalMotorTorque; // 원래 토크로 복구
-        isBoosting = false;
-    }
 
     // Update is called once per frame
     private void FixedUpdate()
@@ -214,7 +170,6 @@ public class CarEngine : MonoBehaviour
         CheckWaypointDistance();    // 경로와의 거리 측정
         Braking();                  // 브레이크
         LerpToSteerAngle();         // 부드러운 회전
-        CreateSkidMarks();          // 스키드 마크 생성 함수 호출
         CheckIfFlipped();           // 차량 뒤집힘 감지
     }
     private void DetectFrontCar()
@@ -587,57 +542,6 @@ public class CarEngine : MonoBehaviour
         wheelFL.steerAngle = Mathf.Lerp(wheelFL.steerAngle, targetSteerAngle, Time.deltaTime * turnSpeed);
         wheelFR.steerAngle = Mathf.Lerp(wheelFR.steerAngle, targetSteerAngle, Time.deltaTime * turnSpeed);
 
-    }
-
-    private void CreateSkidMarks()
-    {
-        WheelCollider[] wheels = { wheelFL, wheelFR, wheelRL, wheelRR }; // 네 바퀴
-        bool shouldCreateSkidMark = false; // 스키드마크 생성 여부
-        Vector3[] skidPositions = new Vector3[wheels.Length]; // 스키드마크 위치
-
-        // 한 바퀴라도 조건을 만족하는지 확인
-        foreach (WheelCollider wheel in wheels)
-        {
-            WheelHit hit;
-            if (wheel.GetGroundHit(out hit)) // 접지 정보 확인
-            {
-                float sidewaysSlip = Mathf.Abs(hit.sidewaysSlip); // 측면 슬립
-                float forwardSlip = Mathf.Abs(hit.forwardSlip);   // 전방 슬립
-
-                // 스키드 마크 생성 조건
-                bool isDrifting = sidewaysSlip > 2.0f; // 드리프트 조건
-                bool isAccelerating = forwardSlip > 1.5f; // 급가속 조건
-                bool isBrakingNow = isBraking; // 브레이크 조건
-                float minSpeedForSkid = 5.0f; // 최소 속도
-
-                if ((isDrifting || isAccelerating || isBrakingNow) && currentSpeed > minSpeedForSkid)
-                {
-                    shouldCreateSkidMark = true; // 조건을 만족하면 스키드 마크 생성 플래그 설정
-                    skidPositions[System.Array.IndexOf(wheels, wheel)] = hit.point + hit.normal * 0.01f; // 위치 저장
-                }
-            }
-        }
-
-        // 조건을 만족했을 경우, 모든 바퀴에 스키드 마크 생성
-        if (shouldCreateSkidMark && skidTime > 0.02f)
-        {
-            foreach (WheelCollider wheel in wheels)
-            {
-                WheelHit hit;
-                if (wheel.GetGroundHit(out hit)) // 접지 정보 확인
-                {
-                    int wheelIndex = System.Array.IndexOf(wheels, wheel); // 현재 바퀴의 인덱스
-                    Vector3 skidPosition = skidPositions[wheelIndex];    // 저장된 위치 가져오기
-                    Quaternion rot = Quaternion.LookRotation(transform.forward);
-
-                    GameObject skidInstance = Instantiate(skidPrefab, skidPosition, rot);
-                    skidInstance.AddComponent<GameObjectDestroy>(); // 일정 시간 후 삭제
-                }
-            }
-            skidTime = 0; // 타이머 초기화
-        }
-
-        skidTime += Time.deltaTime; // 간격 증가
     }
 
     private void Respawn()
