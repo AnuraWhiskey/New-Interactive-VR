@@ -1,3 +1,9 @@
+﻿
+/**
+ * 타이틀 UI와 인게임 UI를 전환한다.
+ * 전환 함수는 타이틀 UI의 버튼이 호출한다.
+ */
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

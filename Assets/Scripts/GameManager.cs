@@ -1,3 +1,8 @@
+﻿
+/**
+ * 게임 시작 버튼을 누를 때까지 플레이어의 이동을 무효로 한다.
+ */
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +12,8 @@ public class GameManager : MonoBehaviour
 {
     [SerializeField]
     private GameObject XROrigin;
+
+    public bool isGameStarted = false;
 
     private LocomotionSystem locomotionSystem;
     private XRDirectInteractor[] directInteractors;

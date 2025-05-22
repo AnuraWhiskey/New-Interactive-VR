@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - Monster
+  - Punch
+  - Interactable
+  - SpecialAttackSensor
   layers:
   - Default
   - TransparentFX
