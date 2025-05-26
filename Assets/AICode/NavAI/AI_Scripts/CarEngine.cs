@@ -23,6 +23,8 @@ public class CarEngine : MonoBehaviour
     public WheelCollider wheelRL;
     public WheelCollider wheelRR;
 
+    public GameObject skidPrefab; // 스키드 마크 프리팹
+    private float skidTime; // 스키드 마크 생성 간격 타이머
 
     public float maxMotorTorque = 100f;  // 바퀴의 회전력
     public float maxBrakeTorque = 200f; // 브레이크 되는 값
@@ -76,7 +78,8 @@ public class CarEngine : MonoBehaviour
                 }
             }
         }
-        isReadyToMove = true; // 차량을 움직일 준비 완료
+
+        StartCoroutine(WaitBeforeStarting(5f)); // 5초 대기후 출발
     }
     private void SetTireFrictionByCarType()
     {
@@ -155,6 +158,47 @@ public class CarEngine : MonoBehaviour
         wheel.sidewaysFriction = sideways;
     }
 
+    private IEnumerator WaitBeforeStarting(float waitTime)
+    {
+            Rigidbody rb = GetComponent<Rigidbody>();
+    if (rb != null)
+    {
+        rb.velocity = Vector3.zero; // 선속도 초기화
+        rb.angularVelocity = Vector3.zero; // 각속도 초기화
+    }
+        ApplyBrakes();
+        yield return new WaitForSeconds(waitTime); // 지정된 시간 대기
+        ReleaseBrakes();
+        isReadyToMove = true; // 차량을 움직일 준비 완료
+        StartCoroutine(InitialBoost(5f, 8f)); // 5초 동안 8배 가속 부스트
+    }
+    private void ApplyBrakes()
+    {
+        wheelFL.brakeTorque = maxBrakeTorque;
+        wheelFR.brakeTorque = maxBrakeTorque;
+        wheelRL.brakeTorque = maxBrakeTorque;
+        wheelRR.brakeTorque = maxBrakeTorque;
+    }
+
+    private void ReleaseBrakes()
+    {
+        wheelFL.brakeTorque = 0;
+        wheelFR.brakeTorque = 0;
+        wheelRL.brakeTorque = 0;
+        wheelRR.brakeTorque = 0;
+    }
+    private IEnumerator InitialBoost(float boostDuration, float boostMultiplier)
+    {
+        isBoosting = true;
+
+        float originalMotorTorque = maxMotorTorque;
+        maxMotorTorque *= boostMultiplier; // 토크 증가
+
+        yield return new WaitForSeconds(boostDuration); // 부스트 지속 시간
+
+        maxMotorTorque = originalMotorTorque; // 원래 토크로 복구
+        isBoosting = false;
+    }
 
     // Update is called once per frame
     private void FixedUpdate()
@@ -543,6 +587,8 @@ public class CarEngine : MonoBehaviour
         wheelFR.steerAngle = Mathf.Lerp(wheelFR.steerAngle, targetSteerAngle, Time.deltaTime * turnSpeed);
 
     }
+
+
 
     private void Respawn()
     {
