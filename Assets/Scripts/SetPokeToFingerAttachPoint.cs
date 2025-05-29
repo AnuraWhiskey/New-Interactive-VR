@@ -1,10 +1,14 @@
+﻿
+/**
+ * 포크 인터랙터의 상호작용 위치를 설정한다.
+ */
+
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
 public class SetPokeToFingerAttachPoint : MonoBehaviour
 {
-    [SerializeField]
-    private Transform PokeAttachPoint;
+    [SerializeField] private Transform PokeAttachPoint;
 
     private XRPokeInteractor xrPokeInteractor;
 

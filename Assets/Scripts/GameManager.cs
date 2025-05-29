@@ -1,6 +1,8 @@
 ﻿
 /**
- * 게임 시작 버튼을 누를 때까지 플레이어의 이동을 무효로 한다.
+ * 게임 시작 버튼을 누를 때까지 플레이어의 이동과 상호작용을 무효로 한다.
+ * 
+ * 게임 시작 함수는 타이틀 UI의 버튼이 호출한다.
  */
 
 using System.Collections;
@@ -10,34 +12,44 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject XROrigin;
+    [SerializeField] private GameObject XROrigin;
 
-    public bool isGameStarted = false;
+    [Space(10f)]
+    [SerializeField] private float PlayerMoveSpeed;
+    [SerializeField] private float PlayerTurnSpeed;
 
-    private LocomotionSystem locomotionSystem;
+    [HideInInspector] public bool isGameStarted = false;
+    private ActionBasedContinuousMoveProvider moveProvider;
+    private ActionBasedContinuousTurnProvider turnProvider;
     private XRDirectInteractor[] directInteractors;
 
     private void Start()
     {
-        locomotionSystem = XROrigin.GetComponentInChildren<LocomotionSystem>();
+        moveProvider = XROrigin.GetComponentInChildren<ActionBasedContinuousMoveProvider>();
+        turnProvider = XROrigin.GetComponentInChildren<ActionBasedContinuousTurnProvider>();
         directInteractors = XROrigin.GetComponentsInChildren<XRDirectInteractor>();
 
-        if (locomotionSystem == null) { Debug.Log("Locomotion System is null."); return; }
+        if (moveProvider == null) { Debug.Log("moveProvider is null."); return; }
+        if (turnProvider == null) { Debug.Log("turnProvider is null."); return; }
         if (directInteractors == null) { Debug.Log("XR Direct Interactors are null."); return; }
 
         foreach (XRDirectInteractor directInteractor in directInteractors)
             directInteractor.enabled = false;
-        locomotionSystem.enabled = false;
+        moveProvider.moveSpeed = 0;
+        turnProvider.turnSpeed = 0;
     }
 
     public void GameStart()
     {
-        if (locomotionSystem == null) { Debug.Log("Locomotion System is null."); return; }
+        if (moveProvider == null) { Debug.Log("moveProvider is null."); return; }
+        if (turnProvider == null) { Debug.Log("turnProvider is null."); return; }
         if (directInteractors == null) { Debug.Log("XR Direct Interactors are null."); return; }
 
         foreach (XRDirectInteractor directInteractor in directInteractors)
             directInteractor.enabled = true;
-        locomotionSystem.enabled = true;
+        moveProvider.moveSpeed = PlayerMoveSpeed;
+        turnProvider.turnSpeed = PlayerTurnSpeed;
+
+        isGameStarted = true;
     }
 }

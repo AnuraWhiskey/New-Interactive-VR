@@ -1,36 +1,30 @@
 ﻿
 /**
  * 몬스터의 HP를 관리한다.
+ * 
  * 몬스터의 HP 총량과 받는 데미지량은 인스펙터에서 정의한다.
  * 매 프레임 몬스터의 HP UI를 업데이트한다.
  * 데미지 함수는 Monster 스크립트에서 호출한다.
  * 몬스터가 데미지를 받으면 플레이어의 스페셜 에너지가 증가한다.
  */
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
 public class MonsterManager : MonoBehaviour
 {
-    [SerializeField]
-    private PlayerManager playerManager;
-    [SerializeField]
-    private Monster monster;
+    [SerializeField] private PlayerManager playerManager;
+    [SerializeField] private Monster monster;
 
     [Space (10f)]
-    [SerializeField]
-    private Slider MonsterHPBar;
-    public int MonsterHP;
+    [SerializeField] private Slider MonsterHPBar;   // HUD의 몬스터 체력 바 UI
+    public int MonsterHP;                           // 몬스터의 최대 HP -> 앱 실행 후엔 현재 HP 상태
 
     [Space(10f)]
-    public float MinimumImpulse;
-    [SerializeField]
-    private int DamageByPunch;
-    [SerializeField]
-    private int DamageByInteractable;
+    public float MinimumImpulse;                        // 몬스터가 데미지를 받는 최소 충격량
+    [SerializeField] private int DamageByPunch;         // 플레이어의 주먹에서 받는 데미지
+    [SerializeField] private int DamageByInteractable;  // 상호작용 가능한 물건에서 받는 데미지
 
     private TMP_Text hpText;
     private int maxHp;

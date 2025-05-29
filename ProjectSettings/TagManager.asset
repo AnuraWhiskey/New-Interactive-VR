@@ -8,6 +8,7 @@ TagManager:
   - Punch
   - Interactable
   - SpecialAttackSensor
+  - EnergyBeam
   layers:
   - Default
   - TransparentFX
