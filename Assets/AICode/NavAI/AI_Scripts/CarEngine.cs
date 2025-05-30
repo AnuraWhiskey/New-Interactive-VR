@@ -62,20 +62,14 @@ public class CarEngine : MonoBehaviour
 
         SetTireFrictionByCarType(); // 차량의 바퀴 마찰력 초기화
 
-        GameObject pathObject = GameObject.FindWithTag("Path");
-        if (pathObject != null)
+        if (path != null)
         {
-            path = pathObject.transform;
-
             Transform[] pathTransforms = path.GetComponentsInChildren<Transform>();
             nodes = new List<Transform>();
 
-            for (int i = 0; i < pathTransforms.Length; i++)
+            foreach (Transform t in pathTransforms)
             {
-                if (pathTransforms[i] != path.transform)
-                {
-                    nodes.Add(pathTransforms[i]);
-                }
+                if (t != path) nodes.Add(t); // 부모 제외
             }
         }
 
