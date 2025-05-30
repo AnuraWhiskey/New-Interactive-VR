@@ -29,7 +29,7 @@ public class CarEngine : MonoBehaviour
     public float maxMotorTorque = 100f;  // 바퀴의 회전력
     public float maxBrakeTorque = 200f; // 브레이크 되는 값
     public float currentSpeed;          // 현재 속도
-    public float maxSpeed = 120f;       // 최고 속도
+    public float maxSpeed = 30f;       // 최고 속도
 
     public Vector3 centerOfMass;        // 자동차의 중점
 
