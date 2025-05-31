@@ -1,16 +1,27 @@
-using System.Collections;
-using System.Collections.Generic;
+﻿
+/**
+ * 플레이어의 특수 에너지를 관리한다.
+ * 
+ * 에너지의 총량과 에너지 재생량은 인스펙터에서 정의한다.
+ * 에너지의 총량까지 매초 EnergyRegen 만큼 재생한다.
+ * 에너지 UI에 매초 현재 에너지량을 업데이트한다.
+ * GainEnergy() 함수는 몬스터가 데미지를 입었을 때 호출된다.
+ */
+
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerManager : MonoBehaviour
 {
-    [SerializeField]
-    private Slider SpecialEnergyGauge;
-    public int SpecialEnergy;
-    public int EnergyRegen;
+    [SerializeField] private GameManager gameManager;
+    [SerializeField] private Slider SpecialEnergyGauge;     // HUD의 에너지 게이지 UI
 
-    private int maxEnergy;
+    [Space (10f)]
+    public int SpecialEnergy;                       // 에너지의 총량 -> 앱 실행 후엔 현재 에너지 상태
+    [SerializeField] private int EnergyRegen;       // 초당 에너지 재생량
+    [SerializeField] private int HitEnergyRegen;    // 공격 시 에너지 재생량
+
+    [HideInInspector] public int maxEnergy;
     private float regenCount;
 
     private void Awake()
@@ -29,10 +40,10 @@ public class PlayerManager : MonoBehaviour
 
     private void Update()
     {
+        // 게임이 시작되지 전엔 실행되지 않음.
+        if (!gameManager.isGameStarted) { return; }
 
-
-        // Energy regen and gauge updates
-        if (SpecialEnergy >= 100) { return; }
+        if (SpecialEnergy >= maxEnergy) { SpecialEnergy = maxEnergy; return; }
 
         regenCount += Time.deltaTime;
         if (regenCount >= 1f)
@@ -44,5 +55,12 @@ public class PlayerManager : MonoBehaviour
         if (SpecialEnergyGauge == null) { Debug.Log("SpecialEnergyGauge is null."); return; }
 
         SpecialEnergyGauge.value = SpecialEnergy;
+    }
+
+    public void GainEnergy()
+    {
+        if (SpecialEnergy >= maxEnergy) { return; }
+
+        SpecialEnergy += HitEnergyRegen;
     }
 }
