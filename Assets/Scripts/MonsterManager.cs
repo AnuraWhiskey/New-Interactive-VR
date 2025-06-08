@@ -19,15 +19,16 @@ public class MonsterManager : MonoBehaviour
 
     [Space (10f)]
     [SerializeField] private Slider MonsterHPBar;   // HUD의 몬스터 체력 바 UI
-    public int MonsterHP;                           // 몬스터의 최대 HP -> 앱 실행 후엔 현재 HP 상태
+    public float MonsterHP;                           // 몬스터의 최대 HP -> 앱 실행 후엔 현재 HP 상태
 
     [Space(10f)]
     public float MinimumImpulse;                        // 몬스터가 데미지를 받는 최소 충격량
-    [SerializeField] private int DamageByPunch;         // 플레이어의 주먹에서 받는 데미지
-    [SerializeField] private int DamageByInteractable;  // 상호작용 가능한 물건에서 받는 데미지
+    [SerializeField] private float DamageByPunch;         // 플레이어의 주먹에서 받는 데미지
+    [SerializeField] private float DamageByInteractable;  // 상호작용 가능한 물건에서 받는 데미지
+    [SerializeField] private float DamageBySpecialAttack; // 특수공격에게 초당 받는 데미지
 
     private TMP_Text hpText;
-    private int maxHp;
+    private float maxHp;
 
     private void Awake()
     {
@@ -48,13 +49,8 @@ public class MonsterManager : MonoBehaviour
     private void Update()
     {
         // HP bar updates
-        if (MonsterHPBar == null) { Debug.Log("MonsterHPBar is null."); return; }
-
         MonsterHPBar.value = MonsterHP;
-
-        if (hpText == null) { Debug.Log("hpText is null."); return; }
-
-        hpText.text = $"{MonsterHP} / {maxHp}";
+        hpText.text = $"{((int)MonsterHP)} / {maxHp}";
     }
 
     public void Damaged(string _tag)
@@ -70,7 +66,12 @@ public class MonsterManager : MonoBehaviour
 
         if (MonsterHP <= 0)
         {
-            // TODO: Kill Monster
+            // TODO: Kill Monster, Game End
         }
+    }
+
+    public void DamagedBySpecialAttack()
+    {
+        MonsterHP -= (DamageBySpecialAttack * Time.deltaTime);
     }
 }

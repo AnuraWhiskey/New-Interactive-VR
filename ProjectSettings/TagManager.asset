@@ -13,6 +13,7 @@ TagManager:
   - Car
   - Terrain
   - Wall
+  - Building
   layers:
   - Default
   - TransparentFX

@@ -16,18 +16,19 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private GameManager gameManager;
     [SerializeField] private Slider SpecialEnergyGauge;     // HUD의 에너지 게이지 UI
 
-    [Space (10f)]
-    public int SpecialEnergy;                       // 에너지의 총량 -> 앱 실행 후엔 현재 에너지 상태
-    [SerializeField] private int EnergyRegen;       // 초당 에너지 재생량
-    [SerializeField] private int HitEnergyRegen;    // 공격 시 에너지 재생량
+    [Space(10f)]
+    public float SpecialEnergy;                       // 에너지의 총량 -> 앱 실행 후엔 현재 에너지 상태
+    [SerializeField] private float EnergyRegen;       // 초당 에너지 재생량
+    [SerializeField] private float HitEnergyRegen;    // 공격 시 에너지 재생량
+    public float EnergyConsumption;                   // 특수공격시 초당 에너지 소비량
 
-    [HideInInspector] public int maxEnergy;
+    [HideInInspector] public float maxEnergy;
     private float regenCount;
 
     private void Awake()
     {
         maxEnergy = SpecialEnergy;
-        SpecialEnergy = 0;
+        SpecialEnergy = 0f;
         regenCount = 0f;
     }
 
@@ -51,8 +52,6 @@ public class PlayerManager : MonoBehaviour
             SpecialEnergy += EnergyRegen;
             regenCount = 0f;
         }
-
-        if (SpecialEnergyGauge == null) { Debug.Log("SpecialEnergyGauge is null."); return; }
 
         SpecialEnergyGauge.value = SpecialEnergy;
     }
