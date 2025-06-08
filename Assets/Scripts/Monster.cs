@@ -14,7 +14,7 @@ public class Monster : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log($"Monster impulse: {collision.impulse.magnitude} from {collision.collider.tag}");   // 디버그: 몬스터가 받은 충격량.
+        //Debug.Log($"Monster impulse: {collision.impulse.magnitude} from {collision.collider.tag}");   // 디버그: 몬스터가 받은 충격량.
 
         if (monsterManager == null) { Debug.Log("MonsterManager is null."); return; }
 
