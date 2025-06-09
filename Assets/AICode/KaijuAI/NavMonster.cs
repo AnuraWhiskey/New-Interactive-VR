@@ -5,14 +5,14 @@ using UnityEngine.AI;
 
 public class NavMonster : MonoBehaviour
 {
-    public Transform player;  // 플레이어 위치
-    public float detectionRange = 150f;  // 감지 거리
-    public float fieldOfViewAngle = 180f;  // 시야각
-    public float memoryDuration = 5f; // 마지막 위치 기억 시간 (초)
+    public Transform player;
+    public float detectionRange = 150f;
+    public float fieldOfViewAngle = 180f;
+    public float memoryDuration = 5f;
 
-    public float buildingAttackRange = 15f;  // 건물 공격 범위
-    public float meleeAttackRange = 15f;  // 근접 공격 범위
-    public float meleeAttackCooldown = 5f; // 근접 공격 쿨타임
+    public float buildingAttackRange = 15f;
+    public float meleeAttackRange = 15f;
+    public float meleeAttackCooldown = 5f;
 
     [Header("Breath Attack")]
     public float breathTriggerDistance = 100f;
@@ -21,35 +21,42 @@ public class NavMonster : MonoBehaviour
     public Transform breathSpawnPoint;
 
     private float lastBreathTime = -Mathf.Infinity;
-    private bool isBreathing = false;
-
     private float lastMeleeAttackTime = -Mathf.Infinity;
+    private bool isBreathing = false;
+    private bool isMeleeAttacking = false;
 
     private NavMeshAgent _agent;
-    private bool LockOn = false;  // 플레이어 감지 여부
-    private Vector3 lastKnownPosition;  // 마지막 감지 위치
-    private float lastSeenTime; // 마지막 감지 시간
+    private Animator _animator;
 
-    private Transform targetBuilding; // 타겟 건물
+    private bool LockOn = false;
+    private Vector3 lastKnownPosition;
+    private float lastSeenTime;
+
+    private Transform targetBuilding;
     private bool isAttackingBuilding = false;
 
     void Start()
     {
         _agent = GetComponent<NavMeshAgent>();
-        lastKnownPosition = transform.position;  // 초기 위치 설정
+        _animator = GetComponent<Animator>();
+        lastKnownPosition = transform.position;
     }
 
     void Update()
     {
         DetectPlayer();
 
-        if (isBreathing) return;
+        if (isBreathing || isMeleeAttacking)
+        {
+            _animator.SetBool("Walk", false);
+            _animator.SetBool("Attack", false);
+            return;
+        }
 
         if (LockOn)
         {
             float distance = Vector3.Distance(transform.position, player.position);
 
-            // 브레스 발사 조건: 추적 범위 이내 && 브레스 범위 이상 && 쿨타임 완료
             if (distance <= detectionRange && distance > breathTriggerDistance && Time.time > lastBreathTime + breathCooldown)
             {
                 StartCoroutine(BreathAttack());
@@ -63,6 +70,9 @@ public class NavMonster : MonoBehaviour
 
             _agent.isStopped = false;
             _agent.SetDestination(player.position);
+            _animator.SetBool("Walk", _agent.velocity.magnitude > 0.1f);
+            _animator.SetBool("Attack", false);
+
             lastKnownPosition = player.position;
             lastSeenTime = Time.time;
             targetBuilding = null;
@@ -72,6 +82,8 @@ public class NavMonster : MonoBehaviour
         {
             _agent.isStopped = false;
             _agent.SetDestination(lastKnownPosition);
+            _animator.SetBool("Walk", _agent.velocity.magnitude > 0.1f);
+            _animator.SetBool("Attack", false);
             targetBuilding = null;
             isAttackingBuilding = false;
         }
@@ -83,11 +95,13 @@ public class NavMonster : MonoBehaviour
                 if (targetBuilding != null)
                 {
                     _agent.SetDestination(targetBuilding.position);
+                    _animator.SetBool("Walk", _agent.velocity.magnitude > 0.1f);
                 }
             }
             else
             {
                 float dist = Vector3.Distance(transform.position, targetBuilding.position);
+
                 if (dist <= meleeAttackRange && Time.time > lastMeleeAttackTime + meleeAttackCooldown)
                 {
                     _agent.ResetPath();
@@ -98,6 +112,8 @@ public class NavMonster : MonoBehaviour
                 else if (dist > meleeAttackRange)
                 {
                     _agent.SetDestination(targetBuilding.position);
+                    _animator.SetBool("Walk", _agent.velocity.magnitude > 0.1f);
+                    _animator.SetBool("Attack", false);
                 }
             }
         }
@@ -161,6 +177,11 @@ public class NavMonster : MonoBehaviour
     {
         isBreathing = true;
         _agent.isStopped = true;
+
+        _animator.SetBool("Walk", false);
+        _animator.SetBool("Attack", false);
+        _animator.ResetTrigger("Attack");
+
         lastBreathTime = Time.time;
 
         Vector3 direction = (player.position - transform.position).normalized;
@@ -193,8 +214,27 @@ public class NavMonster : MonoBehaviour
     private void MeleeAttack(Transform target)
     {
         lastMeleeAttackTime = Time.time;
+        isMeleeAttacking = true;
+
+        _agent.ResetPath();
+        _agent.isStopped = true;
+
         transform.LookAt(new Vector3(target.position.x, transform.position.y, target.position.z));
+
+        // 애니메이션 처리
+        _animator.ResetTrigger("Attack");  // 중복 방지
+        _animator.SetTrigger("Attack");    // Trigger 발동
+
         Debug.Log($"{target.name}에게 근접 공격!");
-        // 여기에 데미지 적용 로직 추가 가능
+
+        StartCoroutine(EndMeleeAttackAfterDelay(1.0f));
+    }
+
+
+    private IEnumerator EndMeleeAttackAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        isMeleeAttacking = false;
+        _agent.isStopped = false;
     }
 }
