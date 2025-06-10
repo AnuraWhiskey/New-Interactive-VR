@@ -1,8 +1,3 @@
-// 수정: FindNearestBuilding() 빌딩 태그 수정 250610
-// 수정: DetectPlayer() 레이캐스트 시작 높이 수정 250610
-// 추가: MeleeAttack(Transform target) 건물 파괴 250610
-
-
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -24,6 +19,11 @@ public class NavMonster : MonoBehaviour
     public float breathCooldown = 25f;
     public GameObject breathEffectPrefab;
     public Transform breathSpawnPoint;
+
+    [Header("Audio")]
+    public AudioSource audioSource;
+    public AudioClip meleeAttackSound;
+    public AudioClip breathSound;
 
     private float lastBreathTime = -Mathf.Infinity;
     private float lastMeleeAttackTime = -Mathf.Infinity;
@@ -145,7 +145,6 @@ public class NavMonster : MonoBehaviour
             if (angleToPlayer <= fieldOfViewAngle / 2)
             {
                 RaycastHit hit;
-                //if (Physics.Raycast(transform.position + Vector3.up * 1.0f, directionToPlayer, out hit, detectionRange))
                 if (Physics.Raycast(transform.position + Vector3.up * 0.1f, directionToPlayer, out hit, detectionRange))
                 {
                     if (hit.transform == player)
@@ -162,7 +161,6 @@ public class NavMonster : MonoBehaviour
 
     Transform FindNearestBuilding()
     {
-        //GameObject[] buildings = GameObject.FindGameObjectsWithTag("Wall");
         GameObject[] buildings = GameObject.FindGameObjectsWithTag("Building");
         Transform nearest = null;
         float minDistance = Mathf.Infinity;
@@ -210,6 +208,11 @@ public class NavMonster : MonoBehaviour
             Destroy(breath, 5f);
         }
 
+        if (audioSource != null && breathSound != null)
+        {
+            audioSource.PlayOneShot(breathSound);
+        }
+
         Debug.Log("브레스 발사!");
 
         yield return new WaitForSeconds(5f);
@@ -228,23 +231,27 @@ public class NavMonster : MonoBehaviour
 
         transform.LookAt(new Vector3(target.position.x, transform.position.y, target.position.z));
 
-        // 애니메이션 처리
-        _animator.ResetTrigger("Attack");  // 중복 방지
-        _animator.SetTrigger("Attack");    // Trigger 발동
+        _animator.ResetTrigger("Attack");
+        _animator.SetTrigger("Attack");
+
+        if (audioSource != null && meleeAttackSound != null)
+        {
+            audioSource.PlayOneShot(meleeAttackSound);
+        }
 
         Debug.Log($"{target.name}에게 근접 공격!");
 
-        // 건물 파괴
         if (target.CompareTag("Building"))
         {
-            //Debug.Log($"{target.name}을 파괴!");
             RayFire.RayfireRigid rayfireRigid = target.GetComponent<RayFire.RayfireRigid>();
-            rayfireRigid.Demolish();
+            if (rayfireRigid != null)
+            {
+                rayfireRigid.Demolish();
+            }
         }
 
         StartCoroutine(EndMeleeAttackAfterDelay(1.0f));
     }
-
 
     private IEnumerator EndMeleeAttackAfterDelay(float delay)
     {
