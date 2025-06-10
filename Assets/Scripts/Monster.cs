@@ -31,5 +31,11 @@ public class Monster : MonoBehaviour
             monsterManager.Damaged("Interactable");
             return;
         }
+
+        if (collision.collider.CompareTag("Car"))
+        {
+            monsterManager.Damaged("Interactable");
+            return;
+        }
     }
 }

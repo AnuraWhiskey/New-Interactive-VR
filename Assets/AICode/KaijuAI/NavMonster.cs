@@ -1,3 +1,8 @@
+// 수정: FindNearestBuilding() 빌딩 태그 수정 250610
+// 수정: DetectPlayer() 레이캐스트 시작 높이 수정 250610
+// 추가: MeleeAttack(Transform target) 건물 파괴 250610
+
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -140,7 +145,8 @@ public class NavMonster : MonoBehaviour
             if (angleToPlayer <= fieldOfViewAngle / 2)
             {
                 RaycastHit hit;
-                if (Physics.Raycast(transform.position + Vector3.up * 1.0f, directionToPlayer, out hit, detectionRange))
+                //if (Physics.Raycast(transform.position + Vector3.up * 1.0f, directionToPlayer, out hit, detectionRange))
+                if (Physics.Raycast(transform.position + Vector3.up * 0.1f, directionToPlayer, out hit, detectionRange))
                 {
                     if (hit.transform == player)
                     {
@@ -156,7 +162,8 @@ public class NavMonster : MonoBehaviour
 
     Transform FindNearestBuilding()
     {
-        GameObject[] buildings = GameObject.FindGameObjectsWithTag("Wall");
+        //GameObject[] buildings = GameObject.FindGameObjectsWithTag("Wall");
+        GameObject[] buildings = GameObject.FindGameObjectsWithTag("Building");
         Transform nearest = null;
         float minDistance = Mathf.Infinity;
 
@@ -226,6 +233,14 @@ public class NavMonster : MonoBehaviour
         _animator.SetTrigger("Attack");    // Trigger 발동
 
         Debug.Log($"{target.name}에게 근접 공격!");
+
+        // 건물 파괴
+        if (target.CompareTag("Building"))
+        {
+            //Debug.Log($"{target.name}을 파괴!");
+            RayFire.RayfireRigid rayfireRigid = target.GetComponent<RayFire.RayfireRigid>();
+            rayfireRigid.Demolish();
+        }
 
         StartCoroutine(EndMeleeAttackAfterDelay(1.0f));
     }
